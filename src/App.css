@@ -1,0 +1,51 @@
+#root {
+  /* max-width: 1280px; */
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.app-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 2fr 1fr;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+/* カレンダー部分の幅を最大まで広げる */
+.fc .fc-view {
+  width: 100%;
+}
+
+.calendar-section {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pomodoro-section {
+  display: grid;
+  grid-column: 1;
+  grid-row: 2;
+
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.timer-section {
+  grid-column: 1;
+  grid-row: 1 / 2;
+}
+
+.gragh-section {
+  grid-column: 2;
+  grid-row: 1 / 2;
+}
