@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
 import "./Timer.css";
+
+import { useEffect, useState } from "react";
 
 const Timer = () => {
   // 時間を1500秒として保持する
