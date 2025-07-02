@@ -1,49 +1,144 @@
 body {
-  height: 100%;
+  display: block;
+  /* height: 500px; */
   /* max-height: 500px; */
   /* min-height: 500px; */
 }
-
 #root {
   /* max-width: 1280px; */
-  width: 100%;
+  /* width: 100%; */
   /* height: 600px; */
   margin: 0 auto;
   padding: 1rem;
   text-align: center;
+
+  /* fullculendarの調整 */
+  --fc-event-border-color: none;
 }
 
 .app-container {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 2fr 1fr;
-  gap: 2px;
-  width: 100%;
-  height: 800px;
+  grid-template-rows: 586px 200px;
+  gap: 10px;
+  /* width: 100%; */
+  /* height: 800px; */
+  /* height: 500px; */
   /* max-height: 400px; */
-  min-height: 400px;
+  /* min-height: 400px; */
 }
 
-/* カレンダー部分の幅を最大まで広げる */
-.fc .fc-view {
-  width: 100%;
-}
-
-.calendar-section {
+.calendar-container {
+  display: grid;
+  /* flex-flow: column; */
+  /* width: 100%; */
+  /* height: 100%; */
+  /* margin: 50px; */
+  /* padding: 0 0 10px 0; */
   grid-column: 1;
   grid-row: 1;
-  height: 80%;
+  position: relative;
+  /* overflow: hidden; */
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr;
+  /* transition: grid-template-columns 0.2s ease-in-out; */
+}
+.calendar-container.close {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: 1fr 0px;
+  grid-template-rows: 1fr;
+  /* position: relative; */
+
+  transition: grid-template-columns 0.4s ease-in-out;
+
+  /* margin: 0 10px 0 0; */
+  /* padding-right: -10px; */
+}
+.calendar-days-section {
+  z-index: 40;
+  grid-column: 1;
+  grid-row: 1;
+  /* position: relative; */
+  /* width: auto; */
+  /* height: 100%; */
+  margin: 0 0px 0 0;
+  /* transition: width 2s ease-in-out; */
+}
+.fc-event-title-container {
+  border: none;
+  color: black;
+  background-color: white;
+}
+.fc {
+  /* width: auto; */
+  /* width: 500px; */
+  /* height: 100%; */
+  /* height: 300px; */
+  /* height: 100dvh; */
+}
+/* カレンダー部分の幅を最大まで広げる */
+.fc-view-harness {
+  /* width: auto; */
+  /* width: 100%; */
+  /* height: 200px; */
+}
+.fc-scrollgrid {
+  /* height: 100px !important; */
+}
+.fc .fc-scrollgrid-section {
+  /* width: auto; */
+  /* height: 100dvh; */
+  /* height: 100px !important; */
+}
+.fc-scroller-harness {
+  /* height: 200px !important; */
+}
+.fc-daygrid-body {
+  width: 100% !important;
+}
+.fc-scrollgrid-sync-table {
+  /* height: 200px !important; */
 }
 
-.pomodoro-section {
+.datedoc-section {
+  display: flex;
+  z-index: 10;
+  grid-column: 2;
+  grid-row: 1;
+  width: 100%;
+  height: 100%;
+  /* position: absolute; */
+  /* right: 10px; */
+  margin: 0 5px 0 0;
+  padding: 0 0 0px 0;
+
+  /* background-color: rgb(228, 235, 198); */
+
+  transform: translateX(5%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.datedoc-section.close {
+  display: flex;
+  z-index: 30;
+  grid-column: 2;
+  transform: translateX(110%);
+  transition: transform 0.4s ease-in-out;
+}
+
+.pomodoro-container {
+  z-index: 20;
+  /* display: none; */
   display: grid;
   grid-column: 1;
   grid-row: 2;
 
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   grid-template-rows: 1fr;
 
-  height: 200px;
+  height: auto;
 }
 
 .timer-section {
