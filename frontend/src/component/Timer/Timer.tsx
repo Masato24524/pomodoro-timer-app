@@ -10,7 +10,6 @@ interface SubTasks {
 const Timer = () => {
   // 時間を1500秒として保持する
   const [totalSec, setTotalSec] = useState(25 * 60); // ポモドーロタイマーのセット時間
-  const [additionalSec, setAdditionalSec] = useState(0);
   const [start, setStart] = useState(false);
   const [inputSubTaskName, setInputSubTaskName] = useState<string>("");
   const [currentSubTasks, setCurrentSubTasks] = useState<SubTasks[]>([]);
@@ -23,7 +22,7 @@ const Timer = () => {
     const getSubTask = async () => {
       const response = await fetch(`/api/timer-routing/`);
       const resJson = await response.json();
-      console.log("resJson of getSubTask", resJson);
+      // console.log("resJson of getSubTask", resJson);
 
       const subTasks: SubTasks[] = resJson.data.map((item: any) => ({
         subtask_name: item.subtask_name,
@@ -39,13 +38,20 @@ const Timer = () => {
   }, [isGetSubTask]);
 
   useEffect(() => {
-    console.log("updated currentSubTasks:", currentSubTasks);
+    // console.log("updated currentSubTasks:", currentSubTasks);
   }, [currentSubTasks]);
 
   const minTime = Math.floor(totalSec / 60);
   const seconds = totalSec % 60;
   const secTime1 = Math.floor(seconds / 10); //秒の十の位
   const secTime2 = seconds % 10; //秒の一の位
+
+  // タイマーを更新するサブタスクを選択する
+  const select_subtask = (e: any) => {
+    const selected_subtask = e.currentTarget.textContent;
+    // console.log("e", e.currentTarget.textContent);
+    setSelectedSubTask(selected_subtask);
+  };
 
   // タイマーの時間を更新する
   useEffect(() => {
@@ -71,13 +77,17 @@ const Timer = () => {
       console.log("date:", date);
       const isoDate: string = date.toISOString().split("T")[0];
       const formattedTime: string = date.toTimeString().split(" ")[0];
-      const timeZone: string = "09";
-      const start_time: string = `${isoDate} ${formattedTime}+${timeZone}`;
-      console.log("start_time:", start_time);
+      const timeZone: string = "09:00";
+      
+      const createTimestamp = (date:string, time:string):string => {
+        const jstTimestamp: string = `${isoDate}T${formattedTime}+${timeZone}`;
+        console.log("start_time:", jstTimestamp);
+        return new Date(jstTimestamp).toISOString(); // UTC時間に変換
+      }
 
       const register_time_data = {
         subtask_name: selectedSubTask,
-        start_time: start_time,
+        start_time: createTimestamp(isoDate, formattedTime), // UTC時間で登録
         task_time: 25 * 60 - totalSec,
       };
 
@@ -154,13 +164,6 @@ const Timer = () => {
     } catch (err) {
       console.error(err);
     }
-  };
-
-  // タイマーを更新するサブタスクを選択する
-  const select_subtask = (e: any) => {
-    const selected_subtask = e.currentTarget.textContent;
-    // console.log("e", e.currentTarget.textContent);
-    setSelectedSubTask(selected_subtask);
   };
 
   // 登録済みのサブタスクを削除する(value = subtask_name)
