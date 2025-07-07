@@ -18,6 +18,27 @@ router.get("/", async (req, res) => {
   }
 });
 
+// サブタスクの時間を日付ごとに取得
+router.get("/daily-time", async( req, res) => {
+  try {
+    const { data, error } = await supabase.rpc("sum_task_daily_times", {
+      start_date: "2025-01-01", // 仮指定
+      end_date: "2025-12-31", // 仮指定
+      timezone_name: "Asia/Tokyo"
+    })
+    console.log("daily-time:",data)
+    console.log("  error:", error);
+    res.status(200).json({
+      success: true,
+      data: data
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'Internal server error'})
+  }
+
+})
+
 // 新たにサブタスクを登録する。ただし名称の重複がないこと。
 router.put("/", async (req, res) => {
   try {
@@ -42,9 +63,9 @@ router.put("/", async (req, res) => {
         .insert({ subtask_name, subtask_date, start_time, task_time })
         .select();
 
-      console.log("  error:", error); // ← これが重要！
+      console.log("  error:", error); 
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         action: "created",
         data: data ? data[0] : null,
@@ -85,7 +106,7 @@ router.post("/:subtask_name", async (req, res) => {
     const { subtask_name } = req.params;
     const { subtask_date, start_time, task_time } = req.body;
 
-    // 選択したサブタスクの時間を登録する（更新ではないので、POSTにすべき？）
+    // 選択したサブタスクの時間を登録する
     const { data, error } = await supabase
       .from("sub_tasks")
       .insert({ subtask_name, subtask_date, start_time, task_time })
