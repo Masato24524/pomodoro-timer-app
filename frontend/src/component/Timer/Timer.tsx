@@ -75,22 +75,27 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
     const register_time = async () => {
       const date = new Date();
       console.log("date:", date);
-      const isoDate: string = date.toISOString().split("T")[0]; // "2025-07-08"
+
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0")
+      const dd = String(date.getDate()).padStart(2, "0")
+      const localDate = `${yyyy}-${mm}-${dd}`
+      console.log("localDate", localDate)
+
       const formattedTime: string = date.toTimeString().split(" ")[0];
       const timeZone: string = "09:00";
       
       const createTimestamp = (date:string, time:string):string => {
-        const jstTimestamp: string = `${isoDate}T${formattedTime}+${timeZone}`;
+        const jstTimestamp: string = `${localDate}T${formattedTime}+${timeZone}`;
         console.log("start_time:", jstTimestamp);
         return new Date(jstTimestamp).toISOString(); // UTC時間に変換
       }
 
       const register_time_data = {
         subtask_name: selectedSubTask,
-        start_time: createTimestamp(isoDate, formattedTime), // UTC時間で登録
+        start_time: createTimestamp(localDate, formattedTime), // UTC時間で登録
         task_time: 25 * 60 - totalSec,
       };
-
       console.log("更新するサブタスク情報", register_time_data);
 
       const response = await fetch(`/api/timer-routing/${selectedSubTask}`, {
