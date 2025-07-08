@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -13,5 +14,10 @@ export default defineConfig({
         secure: false,
       },
     },
+  },
+  test: {
+    environment: "happy-dom",
+    setupFiles: "./src/setupTests.ts",
+    globals: true,
   },
 });
