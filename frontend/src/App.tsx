@@ -74,6 +74,11 @@ function App() {
     return resJson;
   };
 
+  // 画面更新のトリガー子コンポーネントから受け取る共通トリガー
+  const handleRefreshChild = () => {
+    setForceRerender((prev) => prev + 1);
+  }
+
   // 保存ボタンの結果を子コンポーネントから受け取る
   const saveButtonChild = () => {
     setForceRerender((prev) => prev + 1);
@@ -122,10 +127,10 @@ function App() {
 
         <div className="pomodoro-container">
           <div className="timer-section">
-            <Timer />
+            <Timer handleRefresh={handleRefreshChild}/>
           </div>
           <div className="graph-section">
-            <Chart />
+            <Chart rerenderTrigger={forceRerender}/>
           </div>
         </div>
       </div>

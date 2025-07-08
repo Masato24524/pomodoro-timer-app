@@ -7,7 +7,7 @@ interface SubTasks {
   subtask_totalTime: number; // サブタスクの一つの項目のトータル時間
 }
 
-const Timer = () => {
+const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   // 時間を1500秒として保持する
   const [totalSec, setTotalSec] = useState(25 * 60); // ポモドーロタイマーのセット時間
   const [additionalSec, setAdditionalSec] = useState(0);
@@ -96,6 +96,7 @@ const Timer = () => {
     pauseTimer();
     resetTimer();
     setIsGetSubTask(true);
+    handleRefresh();
   };
 
   // タイマーをリセットする

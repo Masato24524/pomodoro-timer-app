@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis } from "recharts";
 
-function Chart() {
+function Chart(rerenderTrigger:any) {
   // uv 縦軸、pv、amt
   // const data = [
   //   { name: "6/12", uv: 4 },
@@ -16,19 +16,23 @@ function Chart() {
   const [data, setData] = useState([])
 
   // Supabaseのデータを取得
-  const fetchAllData = async() => {
-    const response = await fetch(`/api/timer-routing/daily-time`);
-    const result = await response.json();
-    console.log("result", result)
+  useEffect(()=> {
+    const fetchAllData = async() => {
+      const response = await fetch(`/api/timer-routing/daily-time`);
+      const result = await response.json();
+      console.log("result", result)
+  
+      const dailyTimes = result.data.map((item:any) => ({
+        name: item.task_date,
+        uv: item.total_hours
+      }))
+  
+      console.log(dailyTimes)
+      setData(dailyTimes)
+    }
 
-    const dailyTimes = result.data.map((item:any) => ({
-      name: item.task_date,
-      uv: item.total_hours
-    }))
-
-    console.log(dailyTimes)
-    setData(dailyTimes)
-  }
+    fetchAllData()
+  },[rerenderTrigger])
 
   // バーのラベルを表示する関数
   // const renderCustomBarLabel = ({ payload, x, y, width, height, value }) => {
@@ -45,7 +49,6 @@ function Chart() {
 
   return (
     <div className="temp-container">
-      <button onClick={fetchAllData}>更新</button>
       {/* Rechartsで棒グラフを作成 */}
       <div className="chart-container">
         <BarChart width={400} height={200} data={data}>
