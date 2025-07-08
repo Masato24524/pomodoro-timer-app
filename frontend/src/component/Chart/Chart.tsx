@@ -22,13 +22,7 @@ function Chart(rerenderTrigger:any) {
       const result = await response.json();
       console.log("result", result)
   
-      const dailyTimes = result.data.map((item:any) => ({
-        name: item.task_date,
-        uv: item.total_hours
-      }))
-  
-      console.log(dailyTimes)
-      setData(dailyTimes)
+      setData(result.data)
     }
 
     fetchAllData()

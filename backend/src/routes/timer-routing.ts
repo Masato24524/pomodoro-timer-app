@@ -3,6 +3,11 @@ import { supabase } from "../config/supabase";
 
 const router = express.Router();
 
+interface dateType {
+  task_date: string,
+  total_hours: string
+}
+
 // 登録済みのサブタスク名およびトータル時間の取得
 router.get("/", async (req, res) => {
   try {
@@ -20,14 +25,20 @@ router.get("/", async (req, res) => {
 
 // サブタスクの時間を日付ごとに取得
 router.get("/daily-time", async( req, res) => {
-  const date = new Date()
-  const isoDate: string = date.toISOString().split("T")[0];  // "2025-07-08"
+  const today = new Date()
+  const isoDate: string = today.toISOString().split("T")[0];  // "2025-07-08"
   console.log(isoDate)
 
-  const baseDate = new Date(isoDate)
-  const twoWeeksAgo = new Date(baseDate.getTime()-(13 * 24 * 60 * 60 * 1000))
-  const isoTwoWeeksAgo: string = twoWeeksAgo.toISOString().split("T")[0];
+  const startDate = new Date(today.getTime()-(13 * 24 * 60 * 60 * 1000))
+  const isoTwoWeeksAgo: string = startDate.toISOString().split("T")[0];
   console.log(isoTwoWeeksAgo)
+
+  // 指定期間の全日付を生成
+  const allDates: string[] = [];
+  for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)){
+    allDates.push(d.toISOString().split("T")[0])
+  }
+  console.log("allDates", allDates)
 
   try {
     const { data, error } = await supabase.rpc("sum_task_daily_times", {
@@ -37,15 +48,23 @@ router.get("/daily-time", async( req, res) => {
     })
     console.log("daily-time:",data)
     console.log("  error:", error);
+
+    // 取得してきたデータをnew Map()でキー検索できるように整形
+    const dataMap = new Map(data.map((item:dateType) => [item.task_date, item.total_hours]))
+    console.log("dataMap", dataMap)
+
+    // 全日付の配列に対して、取得してきたtatal_hoursを割り当てる（値が無い場合、0とする）
+    const resultData = allDates.map(date =>({ name:date, uv: dataMap.get(date) || 0}))
+    console.log("resultData", resultData)
+
     res.status(200).json({
       success: true,
-      data: data
+      data: resultData
     })
   } catch (err) {
     console.log(err)
     res.status(500).json({ error: 'Internal server error'})
   }
-
 })
 
 // 新たにサブタスクを登録する。ただし名称の重複がないこと。
