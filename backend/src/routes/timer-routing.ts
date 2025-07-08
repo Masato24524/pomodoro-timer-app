@@ -20,10 +20,19 @@ router.get("/", async (req, res) => {
 
 // サブタスクの時間を日付ごとに取得
 router.get("/daily-time", async( req, res) => {
+  const date = new Date()
+  const isoDate: string = date.toISOString().split("T")[0];  // "2025-07-08"
+  console.log(isoDate)
+
+  const baseDate = new Date(isoDate)
+  const twoWeeksAgo = new Date(baseDate.getTime()-(13 * 24 * 60 * 60 * 1000))
+  const isoTwoWeeksAgo: string = twoWeeksAgo.toISOString().split("T")[0];
+  console.log(isoTwoWeeksAgo)
+
   try {
     const { data, error } = await supabase.rpc("sum_task_daily_times", {
-      start_date: "2025-01-01", // 仮指定
-      end_date: "2025-12-31", // 仮指定
+      start_date: isoTwoWeeksAgo, // 仮指定 "2025-01-01"
+      end_date: isoDate, // 仮指定 "2025-01-01"
       timezone_name: "Asia/Tokyo"
     })
     console.log("daily-time:",data)

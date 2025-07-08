@@ -69,7 +69,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
     const register_time = async () => {
       const date = new Date();
       console.log("date:", date);
-      const isoDate: string = date.toISOString().split("T")[0];
+      const isoDate: string = date.toISOString().split("T")[0]; // "2025-07-08"
       const formattedTime: string = date.toTimeString().split(" ")[0];
       const timeZone: string = "09";
       const start_time: string = `${isoDate} ${formattedTime}+${timeZone}`;
