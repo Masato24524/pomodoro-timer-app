@@ -127,7 +127,6 @@ const Timer = () => {
       // 追加したいデータを定義
       const addSubTaskData = {
         subtask_name: inputSubTaskName,
-        subtask_date: null,
         start_time: null,
         task_time: 0,
       };
@@ -167,6 +166,14 @@ const Timer = () => {
   };
 
   // 登録済みのサブタスクを削除する(value = subtask_name)
+  // 削除確認のポップアップ
+  const confirmDeleteSubtask = (value:string) => {
+    if (window.confirm("このサブタスクを削除しますか？")){
+      deleteSubtask(value)
+    }
+  }
+
+  // 実際の削除処理
   const deleteSubtask = async (value: any) => {
     console.log(value);
 
@@ -232,9 +239,10 @@ const Timer = () => {
                 <div className="sub-task-totaltime">
                   {task.subtask_totalTime}hr
                 </div>
+                {/* サブタスクの削除ボタン */}
                 <button
                   className="delete-subtask"
-                  onClick={() => deleteSubtask(task.subtask_name)}
+                  onClick={() => confirmDeleteSubtask(task.subtask_name)}
                 >
                   ×
                 </button>
