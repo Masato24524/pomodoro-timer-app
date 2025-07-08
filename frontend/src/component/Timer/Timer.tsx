@@ -7,7 +7,7 @@ interface SubTasks {
   subtask_totalTime: number; // サブタスクの一つの項目のトータル時間
 }
 
-const Timer = () => {
+const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   // 時間を1500秒として保持する
   const [totalSec, setTotalSec] = useState(25 * 60); // ポモドーロタイマーのセット時間
   const [start, setStart] = useState(false);
@@ -75,7 +75,7 @@ const Timer = () => {
     const register_time = async () => {
       const date = new Date();
       console.log("date:", date);
-      const isoDate: string = date.toISOString().split("T")[0];
+      const isoDate: string = date.toISOString().split("T")[0]; // "2025-07-08"
       const formattedTime: string = date.toTimeString().split(" ")[0];
       const timeZone: string = "09:00";
       
@@ -106,6 +106,7 @@ const Timer = () => {
     pauseTimer();
     resetTimer();
     setIsGetSubTask(true);
+    handleRefresh();
   };
 
   // タイマーをリセットする

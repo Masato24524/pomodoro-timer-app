@@ -3,6 +3,11 @@ import { supabase } from "../config/supabase";
 
 const router = express.Router();
 
+interface dateType {
+  task_date: string,
+  total_hours: string
+}
+
 // 登録済みのサブタスク名およびトータル時間の取得
 router.get("/", async (req, res) => {
   try {
@@ -17,6 +22,50 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// サブタスクの時間を日付ごとに取得
+router.get("/daily-time", async( req, res) => {
+  const today = new Date()
+  const isoDate: string = today.toISOString().split("T")[0];  // "2025-07-08"
+  console.log(isoDate)
+
+  const startDate = new Date(today.getTime()-(13 * 24 * 60 * 60 * 1000))
+  const isoTwoWeeksAgo: string = startDate.toISOString().split("T")[0];
+  console.log(isoTwoWeeksAgo)
+
+  // 指定期間の全日付を生成
+  const allDates: string[] = [];
+  for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)){
+    allDates.push(d.toISOString().split("T")[0])
+  }
+  console.log("allDates", allDates)
+
+  try {
+    const { data, error } = await supabase.rpc("sum_task_daily_times", {
+      start_date: isoTwoWeeksAgo, // 仮指定 "2025-01-01"
+      end_date: isoDate, // 仮指定 "2025-01-01"
+      timezone_name: "Asia/Tokyo"
+    })
+    console.log("daily-time:",data)
+    console.log("  error:", error);
+
+    // 取得してきたデータをnew Map()でキー検索できるように整形
+    const dataMap = new Map(data.map((item:dateType) => [item.task_date, item.total_hours]))
+    console.log("dataMap", dataMap)
+
+    // 全日付の配列に対して、取得してきたtatal_hoursを割り当てる（値が無い場合、0とする）
+    const resultData = allDates.map(date =>({ name:date, uv: dataMap.get(date) || 0}))
+    console.log("resultData", resultData)
+
+    res.status(200).json({
+      success: true,
+      data: resultData
+    })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'Internal server error'})
+  }
+})
 
 // 新たにサブタスクを登録する。ただし名称の重複がないこと。
 router.put("/", async (req, res) => {
@@ -42,9 +91,9 @@ router.put("/", async (req, res) => {
         .insert({ subtask_name, subtask_date, start_time, task_time })
         .select();
 
-      console.log("  error:", error); // ← これが重要！
+      console.log("  error:", error); 
 
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         action: "created",
         data: data ? data[0] : null,
@@ -85,7 +134,7 @@ router.post("/:subtask_name", async (req, res) => {
     const { subtask_name } = req.params;
     const { subtask_date, start_time, task_time } = req.body;
 
-    // 選択したサブタスクの時間を登録する（更新ではないので、POSTにすべき？）
+    // 選択したサブタスクの時間を登録する
     const { data, error } = await supabase
       .from("sub_tasks")
       .insert({ subtask_name, subtask_date, start_time, task_time })
