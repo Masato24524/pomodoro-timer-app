@@ -26,12 +26,21 @@ router.get("/", async (req, res) => {
 // サブタスクの時間を日付ごとに取得
 router.get("/daily-time", async( req, res) => {
   const today = new Date()
-  const isoDate: string = today.toISOString().split("T")[0];  // "2025-07-08"
-  console.log(isoDate)
 
-  const startDate = new Date(today.getTime()-(13 * 24 * 60 * 60 * 1000))
-  const isoTwoWeeksAgo: string = startDate.toISOString().split("T")[0];
-  console.log(isoTwoWeeksAgo)
+  const convertDate = (date:any) => {
+    return new Date(date).toLocaleDateString("sv-SE") // yyyy-mm-dd形式になる
+  }
+  console.log("convertDate(today)",convertDate(today))
+
+  const localDate = convertDate(today)
+  
+  // getTimeはUTCで取得。ここで1日ずれる可能性
+  const startDate = new Date(today.getTime()-(13 * 24 * 60 * 60 * 1000)) // 13日前をミリ秒で指定
+  console.log("startDate", startDate)
+  // JSTに変換
+  const startDateJST = new Date(startDate.getTime()+ (1 * 9 * 60 * 60 * 1000))
+  const jstTwoWeeksAgo = convertDate(startDateJST)
+  console.log("jstTwoWeeksAgo", jstTwoWeeksAgo)
 
   // 指定期間の全日付を生成
   const allDates: string[] = [];
@@ -42,8 +51,8 @@ router.get("/daily-time", async( req, res) => {
 
   try {
     const { data, error } = await supabase.rpc("sum_task_daily_times", {
-      start_date: isoTwoWeeksAgo, // 仮指定 "2025-01-01"
-      end_date: isoDate, // 仮指定 "2025-01-01"
+      start_date: jstTwoWeeksAgo, // 仮指定 "2025-01-01"
+      end_date: localDate, // 仮指定 "2025-01-01"
       timezone_name: "Asia/Tokyo"
     })
     console.log("daily-time:",data)
