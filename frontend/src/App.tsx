@@ -61,7 +61,7 @@ function MainApp() {
         const { doc_title: title, entry_date: start } = day;
         return { title, start };
       });
-      // console.log(dispAllData);
+      console.log("dispAllData", dispAllData);
       setEvents(dispAllData);
     };
 
