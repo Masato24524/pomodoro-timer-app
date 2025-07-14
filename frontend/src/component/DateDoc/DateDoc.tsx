@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./DateDoc.css";
-import type { dataType, fetchedDataResponse } from "../../types/type";
-
-// import React from "react";
+import type { fetchedDataResponse } from "../../types/type";
+import { confirmSession } from "../../utils/confirmSession";
 
 const DateDoc = ({
   fetchedData,
@@ -35,6 +34,9 @@ const DateDoc = ({
     selectedDate: string
   ) => {
     try {
+      // JWTトークンからセッション情報を取得
+      const session = await confirmSession();
+
       // 更新したいデータを定義
       const entryData = {
         id: fetchedData?.data.id,
@@ -48,7 +50,10 @@ const DateDoc = ({
       // データを更新する
       const response = await fetch(`/api/entries/${entryData.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`, // ヘッダーにアクセストークを付与する
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(entryData),
       });
 
