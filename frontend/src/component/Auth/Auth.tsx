@@ -42,7 +42,7 @@ const Auth = () => {
 
   return (
     <div className="signup-container">
-      <h2>学習記録アプリ 「CalenTa」</h2>
+      <h2>学習記録アプリ 「PomoLog」</h2>
       {/* <h2>{isSignup ? "サインアップ" : "サインイン"}</h2> */}
       <div>
         <form action="" className="signup-form">
