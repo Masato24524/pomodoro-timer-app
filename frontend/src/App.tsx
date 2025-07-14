@@ -14,14 +14,10 @@ import { useEffect, useState } from "react";
 import type { dataType, fetchedDataResponse } from "./types/type";
 import { confirmSession } from "./utils/confirmSession";
 
-interface AuthProviderProps extends React.PropsWithChildren {
-  handleLogin: () => void;
-}
-
 const App = () => {
   const [login, setLogin] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin: () => void = () => {
     console.log("handle login!!!");
     console.log("login", login);
 

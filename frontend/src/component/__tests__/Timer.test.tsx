@@ -1,8 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { vi, describe, test, expect, beforeEach, afterEach } from "vitest";
 import Timer from "../Timer/Timer";
-import userEvent from "@testing-library/user-event";
-import { act } from "react";
 
 beforeEach(() => {
   // fetchをモック化
@@ -26,7 +24,7 @@ afterEach(() => {
 
 describe("Timer", () => {
   test("タイマーコンポーネントが正常にレンダリングされる", () => {
-    render(<Timer />);
+    render(<Timer handleRefresh={() => {}} />);
     // screen.debug();
     expect(screen.getByRole("button", { name: "Start" })).toBeInTheDocument();
 
@@ -36,10 +34,10 @@ describe("Timer", () => {
   });
 
   test("ボタンの存在確認", () => {
-    render(<Timer />);
+    render(<Timer handleRefresh={() => {}} />);
     // Startボタンを探す（複数の方法で）
-    const startButton1 = screen.queryByText("Start");
-    const startButton2 = screen.queryByRole("button", { name: "Start" });
+    // const startButton1 = screen.queryByText("Start");
+    // const startButton2 = screen.queryByRole("button", { name: "Start" });
     const allButtons = screen.getAllByRole("button");
 
     // console.log("Start (text):", startButton1);
@@ -52,7 +50,7 @@ describe("Timer", () => {
 });
 
 test("Startボタンを押すと、タイマーがスタートする", async () => {
-  render(<Timer />);
+  render(<Timer handleRefresh={() => {}} />);
 
   expect(screen.getByText("Start")).toBeInTheDocument();
 

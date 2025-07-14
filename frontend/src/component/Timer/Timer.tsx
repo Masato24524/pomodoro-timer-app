@@ -1,4 +1,3 @@
-import { headers } from "happy-dom/lib/PropertySymbol.js";
 import { confirmSession } from "../../utils/confirmSession";
 import "./Timer.css";
 
@@ -99,7 +98,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       const timeZone: string = "09:00";
 
       const createTimestamp = (date: string, time: string): string => {
-        const jstTimestamp: string = `${localDate}T${formattedTime}+${timeZone}`;
+        const jstTimestamp: string = `${date}T${time}+${timeZone}`;
         console.log("start_time:", jstTimestamp);
         return new Date(jstTimestamp).toISOString(); // UTC時間に変換
       };
