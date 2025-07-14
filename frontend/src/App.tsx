@@ -4,13 +4,38 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
+import Auth from "./component/Auth/Auth";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+
 import Timer from "./component/Timer/Timer";
 import Chart from "./component/Chart/Chart";
 import DateDoc from "./component/DateDoc/DateDoc";
 import { useEffect, useState } from "react";
 import type { dataType, fetchedDataResponse } from "./types/type";
+import { confirmSession } from "./utils/confirmSession";
 
-function App() {
+interface AuthProviderProps extends React.PropsWithChildren {
+  handleLogin: () => void;
+}
+
+const App = () => {
+  const [login, setLogin] = useState(false);
+
+  const handleLogin = () => {
+    console.log("handle login!!!");
+    console.log("login", login);
+
+    setLogin(!login);
+  };
+
+  return (
+    <AuthProvider handleLogin={handleLogin}>
+      {login ? <MainApp /> : <Auth />}
+    </AuthProvider>
+  );
+};
+
+function MainApp() {
   const [events, setEvents] = useState();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [isInputMenu, setIsInputMenu] = useState<boolean>(false);
@@ -18,11 +43,19 @@ function App() {
     null
   );
   const [forceRerender, setForceRerender] = useState<number>(0); // メニューが閉じたあとの更新用
+  const { logOut } = useAuth();
 
   // ページを開いた後の初回、月のデータを全件取得
   useEffect(() => {
     const fetchEvents = async () => {
-      const response = await fetch(`/api/entries/`);
+      // JWTトークンからセッション情報を取得
+      const session = await confirmSession();
+
+      const response = await fetch(`/api/entries/`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
       const resJson = await response.json();
       // console.log(resJson);
 
@@ -41,7 +74,7 @@ function App() {
 
   // 日付欄をクリックしたときの処理
   const handleDateClick = async (selectInfo: any) => {
-    console.log("selectInfo", selectInfo);
+    // console.log("selectInfo", selectInfo);
 
     const selectedDate: string = selectInfo.dateStr; // 日付の情報を取得
     // フェッチした日付の情報をAPIリクエストで送信
@@ -59,8 +92,15 @@ function App() {
 
   // 選択した日付の情報を受け取ってAPIをフェッチする関数
   const fetchEntry = async (date: string) => {
+    // JWTトークンからセッション情報を取得
+    const session = await confirmSession();
+
     // ここで:date部分を指定
-    const response = await fetch(`/api/entries/${date}`);
+    const response = await fetch(`/api/entries/${date}`, {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
     const resJson = (await response.json()) as fetchedDataResponse;
     // console.log("json_data", resJson);
 
@@ -77,7 +117,7 @@ function App() {
   // 画面更新のトリガー子コンポーネントから受け取る共通トリガー
   const handleRefreshChild = () => {
     setForceRerender((prev) => prev + 1);
-  }
+  };
 
   // 保存ボタンの結果を子コンポーネントから受け取る
   const saveButtonChild = () => {
@@ -103,6 +143,9 @@ function App() {
 
   return (
     <>
+      <button className="button-logout" onClick={logOut}>
+        ログアウト
+      </button>
       <div className="app-container">
         <div className={`calendar-container ${isInputMenu ? "" : "close"}`}>
           <div className="calendar-days-section">
@@ -127,10 +170,10 @@ function App() {
 
         <div className="pomodoro-container">
           <div className="timer-section">
-            <Timer handleRefresh={handleRefreshChild}/>
+            <Timer handleRefresh={handleRefreshChild} />
           </div>
           <div className="graph-section">
-            <Chart rerenderTrigger={forceRerender}/>
+            <Chart rerenderTrigger={forceRerender} />
           </div>
         </div>
       </div>

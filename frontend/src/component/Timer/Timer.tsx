@@ -1,3 +1,5 @@
+import { headers } from "happy-dom/lib/PropertySymbol.js";
+import { confirmSession } from "../../utils/confirmSession";
 import "./Timer.css";
 
 import { useEffect, useState } from "react";
@@ -20,16 +22,27 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   // 現在の登録サブタスク名およびトータル時間を表示する
   useEffect(() => {
     const getSubTask = async () => {
-      const response = await fetch(`/api/timer-routing/`);
-      const resJson = await response.json();
-      // console.log("resJson of getSubTask", resJson);
+      try {
+        // JWTトークンからセッション情報を取得
+        const session = await confirmSession();
 
-      const subTasks: SubTasks[] = resJson.data.map((item: any) => ({
-        subtask_name: item.subtask_name,
-        subtask_totalTime: item.subtask_totaltime,
-      }));
+        const response = await fetch(`/api/timer-routing/`, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+        const resJson = await response.json();
+        console.log("resJson of getSubTask", resJson);
 
-      setCurrentSubTasks(subTasks);
+        const subTasks: SubTasks[] = resJson.data.map((item: any) => ({
+          subtask_name: item.subtask_name,
+          subtask_totalTime: item.subtask_totaltime,
+        }));
+
+        setCurrentSubTasks(subTasks);
+      } catch (err) {
+        console.log("err", err);
+      }
     };
 
     getSubTask();
@@ -77,19 +90,19 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       console.log("date:", date);
 
       const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0")
-      const dd = String(date.getDate()).padStart(2, "0")
-      const localDate = `${yyyy}-${mm}-${dd}`
-      console.log("localDate", localDate)
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      const localDate = `${yyyy}-${mm}-${dd}`;
+      console.log("localDate", localDate);
 
       const formattedTime: string = date.toTimeString().split(" ")[0];
       const timeZone: string = "09:00";
-      
-      const createTimestamp = (date:string, time:string):string => {
+
+      const createTimestamp = (date: string, time: string): string => {
         const jstTimestamp: string = `${localDate}T${formattedTime}+${timeZone}`;
         console.log("start_time:", jstTimestamp);
         return new Date(jstTimestamp).toISOString(); // UTC時間に変換
-      }
+      };
 
       const register_time_data = {
         subtask_name: selectedSubTask,
@@ -98,13 +111,23 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       };
       console.log("更新するサブタスク情報", register_time_data);
 
-      const response = await fetch(`/api/timer-routing/${selectedSubTask}`, {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(register_time_data),
-      });
-      const resJson = await response.json();
-      console.log("更新したsubtaskの情報:", resJson);
+      try {
+        // JWTトークンからセッション情報を取得
+        const session = await confirmSession();
+
+        const response = await fetch(`/api/timer-routing/${selectedSubTask}`, {
+          method: "post",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(register_time_data),
+        });
+        const resJson = await response.json();
+        console.log("更新したsubtaskの情報:", resJson);
+      } catch (err) {
+        console.log("err", err);
+      }
     };
 
     register_time();
@@ -130,6 +153,9 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   const addSubTask = async () => {
     console.log(inputSubTaskName);
     try {
+      // JWTトークンからセッション情報を取得
+      const session = await confirmSession();
+
       // 追加したいデータを定義
       const addSubTaskData = {
         subtask_name: inputSubTaskName,
@@ -137,12 +163,15 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
         task_time: 0,
       };
 
-      console.log("登録するsubtask:", addSubTaskData);
+      // console.log("登録するsubtask:", addSubTaskData);
 
       // データを追加する
       const response = await fetch(`/api/timer-routing/`, {
         method: "put",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`, // ヘッダーにアクセストークを付与する
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(addSubTaskData),
       });
 
@@ -173,20 +202,26 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
 
   // 登録済みのサブタスクを削除する(value = subtask_name)
   // 削除確認のポップアップ
-  const confirmDeleteSubtask = (value:string) => {
-    if (window.confirm("このサブタスクを削除しますか？")){
-      deleteSubtask(value)
+  const confirmDeleteSubtask = (value: string) => {
+    if (window.confirm("このサブタスクを削除しますか？")) {
+      deleteSubtask(value);
     }
-  }
+  };
 
   // 実際の削除処理
   const deleteSubtask = async (value: any) => {
     console.log(value);
 
     try {
+      // JWTトークンからセッション情報を取得
+      const session = await confirmSession();
+
       // サブタスクの削除
       const response = await fetch(`/api/timer-routing/${value}`, {
         method: "delete",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
       const resJson = await response.json();
 

@@ -1,0 +1,31 @@
+/* .h2 {
+  font-weight: bold;
+} */
+
+.signup-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+}
+
+.email {
+  margin-bottom: 0.5rem;
+}
+.password {
+  margin-bottom: 0.5rem;
+}
+.button-signup {
+  display: flex;
+  height: 2rem;
+  align-items: center;
+
+  margin: 1rem auto;
+  color: white;
+  background-color: #464fe5;
+}
