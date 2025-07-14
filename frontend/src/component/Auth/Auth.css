@@ -7,6 +7,14 @@
   flex-direction: column;
 }
 
+.note {
+  display: block;
+  text-align: center;
+  align-items: center;
+
+  margin: 2rem 0;
+}
+
 .signup-form {
   display: flex;
   flex-direction: column;

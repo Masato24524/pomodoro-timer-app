@@ -44,6 +44,13 @@ const Auth = () => {
     <div className="signup-container">
       <h2>学習記録アプリ 「PomoLog」</h2>
       {/* <h2>{isSignup ? "サインアップ" : "サインイン"}</h2> */}
+      <div className="note">
+        新規作成以外に、下記でお試しログインもできます。
+        <br />
+        メールアドレス：dum25303@gmail.com
+        <br />
+        パスワード：test1234
+      </div>
       <div>
         <form action="" className="signup-form">
           <input
