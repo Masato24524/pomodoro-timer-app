@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../config/api";
 import { confirmSession } from "../../utils/confirmSession";
 import "./Timer.css";
 
@@ -25,7 +26,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
         // JWTトークンからセッション情報を取得
         const session = await confirmSession();
 
-        const response = await fetch(`/api/timer-routing/`, {
+        const response = await fetch(`${API_BASE_URL}/api/timer-routing/`, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
           },
@@ -114,14 +115,17 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
         // JWTトークンからセッション情報を取得
         const session = await confirmSession();
 
-        const response = await fetch(`/api/timer-routing/${selectedSubTask}`, {
-          method: "post",
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(register_time_data),
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/api/timer-routing/${selectedSubTask}`,
+          {
+            method: "post",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(register_time_data),
+          }
+        );
         const resJson = await response.json();
         console.log("更新したsubtaskの情報:", resJson);
       } catch (err) {
@@ -165,7 +169,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       // console.log("登録するsubtask:", addSubTaskData);
 
       // データを追加する
-      const response = await fetch(`/api/timer-routing/`, {
+      const response = await fetch(`${API_BASE_URL}/api/timer-routing/`, {
         method: "put",
         headers: {
           Authorization: `Bearer ${session.access_token}`, // ヘッダーにアクセストークを付与する
@@ -216,12 +220,15 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       const session = await confirmSession();
 
       // サブタスクの削除
-      const response = await fetch(`/api/timer-routing/${value}`, {
-        method: "delete",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/timer-routing/${value}`,
+        {
+          method: "delete",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
       const resJson = await response.json();
 
       if (resJson.success) {

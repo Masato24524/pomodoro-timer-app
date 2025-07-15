@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis } from "recharts";
 import { confirmSession } from "../../utils/confirmSession";
+import { API_BASE_URL } from "../../config/api";
 
 function Chart(rerenderTrigger: any) {
   // uv 縦軸、pv、amt
@@ -23,11 +24,14 @@ function Chart(rerenderTrigger: any) {
         // JWTトークンからセッション情報を取得
         const session = await confirmSession();
 
-        const response = await fetch(`/api/timer-routing/daily-time`, {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/api/timer-routing/daily-time`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
         const result = await response.json();
         console.log("result", result);
 

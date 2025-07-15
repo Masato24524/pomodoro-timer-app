@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./DateDoc.css";
 import type { fetchedDataResponse } from "../../types/type";
 import { confirmSession } from "../../utils/confirmSession";
+import { API_BASE_URL } from "../../config/api";
 
 const DateDoc = ({
   fetchedData,
@@ -48,14 +49,17 @@ const DateDoc = ({
       console.log("entryData", entryData);
 
       // データを更新する
-      const response = await fetch(`/api/entries/${entryData.id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${session.access_token}`, // ヘッダーにアクセストークを付与する
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(entryData),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/entries/${entryData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`, // ヘッダーにアクセストークを付与する
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(entryData),
+        }
+      );
 
       const resJson = await response.json();
 
