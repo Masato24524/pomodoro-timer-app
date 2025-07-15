@@ -13,6 +13,7 @@ import DateDoc from "./component/DateDoc/DateDoc";
 import { useEffect, useState } from "react";
 import type { dataType, fetchedDataResponse } from "./types/type";
 import { confirmSession } from "./utils/confirmSession";
+import { API_BASE_URL } from "./config/api";
 
 const App = () => {
   const [login, setLogin] = useState(false);
@@ -47,7 +48,7 @@ function MainApp() {
       // JWTトークンからセッション情報を取得
       const session = await confirmSession();
 
-      const response = await fetch(`/api/entries/`, {
+      const response = await fetch(`${API_BASE_URL}/api/entries/`, {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },
@@ -92,7 +93,7 @@ function MainApp() {
     const session = await confirmSession();
 
     // ここで:date部分を指定
-    const response = await fetch(`/api/entries/${date}`, {
+    const response = await fetch(`${API_BASE_URL}/api/entries/${date}`, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
       },
