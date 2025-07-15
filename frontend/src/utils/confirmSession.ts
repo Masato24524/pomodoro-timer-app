@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { supabase } from "../config/supabase";
 
 // JWTトークンからセッション情報を取得
 export async function confirmSession() {
