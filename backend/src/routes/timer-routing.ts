@@ -1,5 +1,5 @@
 import express from "express";
-import { supabase } from "../config/supabase";
+import { createSupabaseClient } from "../config/supabase";
 import { getUserSession } from "../utils/getUserSession";
 
 const router = express.Router();
@@ -11,6 +11,9 @@ interface dateType {
 
 // 登録済みのサブタスク名およびトータル時間の取得
 router.get("/", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   try {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res); // セッション情報をrequestで受け取っている
@@ -31,6 +34,9 @@ router.get("/", async (req, res) => {
 
 // グラフ用に、サブタスクの時間を日付ごとに取得
 router.get("/daily-time", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   // 日付データの生成
   const today = new Date();
 
@@ -67,7 +73,7 @@ router.get("/daily-time", async (req, res) => {
       end_date: localDate, // 仮指定 "2025-01-01"
       timezone_name: "Asia/Tokyo",
     });
-    console.log("daily-time:", data);
+    // console.log("daily-time:", data);
     console.log("  error:", error);
 
     // 取得してきたデータをnew Map()でキー検索できるように整形
@@ -81,7 +87,7 @@ router.get("/daily-time", async (req, res) => {
       name: date,
       uv: dataMap.get(date) || 0,
     }));
-    console.log("resultData", resultData);
+    // console.log("resultData", resultData);
 
     res.status(200).json({
       success: true,
@@ -95,6 +101,9 @@ router.get("/daily-time", async (req, res) => {
 
 // 新たにサブタスクを登録する。ただし名称の重複がないこと。
 router.put("/", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   try {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res); // セッション情報をrequestで受け取っている
@@ -143,6 +152,9 @@ router.put("/", async (req, res) => {
 
 // 登録済のサブタスクを削除する
 router.delete("/:subtask_name", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   try {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res); // セッション情報をrequestで受け取っている
@@ -169,6 +181,9 @@ router.delete("/:subtask_name", async (req, res) => {
 
 // 選択したサブタスクの時間を登録
 router.post("/:subtask_name", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   try {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res); // セッション情報をrequestで受け取っている

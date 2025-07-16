@@ -11,17 +11,14 @@ import Timer from "./component/Timer/Timer";
 import Chart from "./component/Chart/Chart";
 import DateDoc from "./component/DateDoc/DateDoc";
 import { useEffect, useState } from "react";
-import type { dataType, fetchedDataResponse } from "./types/type";
 import { confirmSession } from "./utils/confirmSession";
 import { API_BASE_URL } from "./config/api";
+import type { dataType, fetchedDataResponse } from "./types/type";
 
 const App = () => {
   const [login, setLogin] = useState(false);
 
   const handleLogin: () => void = () => {
-    console.log("handle login!!!");
-    console.log("login", login);
-
     setLogin(!login);
   };
 
@@ -40,13 +37,20 @@ function MainApp() {
     null
   );
   const [forceRerender, setForceRerender] = useState<number>(0); // メニューが閉じたあとの更新用
-  const { logOut } = useAuth();
+  const { isAuthenticated, logOut } = useAuth();
 
   // ページを開いた後の初回、月のデータを全件取得
   useEffect(() => {
     const fetchEvents = async () => {
+      // 認証されていない場合は何もしない
+      if (!isAuthenticated) {
+        console.log("User not authenticated");
+        return;
+      }
+
       // JWTトークンからセッション情報を取得
       const session = await confirmSession();
+      // console.log("App session first:", session);
 
       const response = await fetch(`${API_BASE_URL}/api/entries/`, {
         headers: {
@@ -54,7 +58,7 @@ function MainApp() {
         },
       });
       const resJson = await response.json();
-      // console.log(resJson);
+      // console.log("resJson_App", resJson);
 
       // return resJson;
 
@@ -62,12 +66,12 @@ function MainApp() {
         const { doc_title: title, entry_date: start } = day;
         return { title, start };
       });
-      console.log("dispAllData", dispAllData);
+      // console.log("dispAllData", dispAllData);
       setEvents(dispAllData);
     };
 
     fetchEvents();
-  }, [forceRerender]);
+  }, [isAuthenticated, forceRerender]);
 
   // 日付欄をクリックしたときの処理
   const handleDateClick = async (selectInfo: any) => {

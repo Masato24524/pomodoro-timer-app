@@ -1,10 +1,13 @@
 import express from "express";
-import { supabase } from "../config/supabase";
+import { createSupabaseClient } from "../config/supabase";
 
 const router = express.Router();
 
 // サインアップ
 router.post("/signup", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   console.log("req.body", req.body);
   const { email, password } = req.body;
 
@@ -48,6 +51,9 @@ router.post("/signup", async (req, res) => {
 
 // サインイン
 router.post("/signin", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   // console.log("signin");
   // console.log("req.body", req.body);
   const { email, password } = req.body;
@@ -82,6 +88,9 @@ router.post("/signin", async (req, res) => {
 
 // サインアウト
 router.post("/signout", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   await supabase.auth.signOut();
 
   res.status(200).json({

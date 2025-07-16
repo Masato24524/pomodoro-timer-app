@@ -1,12 +1,14 @@
 import express from "express";
-import { supabase } from "../config/supabase";
+import { createSupabaseClient } from "../config/supabase";
 import { getUserSession } from "../utils/getUserSession";
 
 const router = express.Router();
 
 // 特定の月のエントリーを全件取得
 router.get("/", async (req, res) => {
-  // console.log("req entries data all", req);
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   try {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res); // セッション情報をrequestで受け取っている
@@ -17,6 +19,7 @@ router.get("/", async (req, res) => {
       .select("*")
       .eq("uid", user?.id);
     // console.log("allData", data);
+    console.log("supabase error:", error);
 
     res.json({ data });
   } catch (error) {
@@ -26,6 +29,9 @@ router.get("/", async (req, res) => {
 
 // 特定の日付のエントリー取得
 router.get("/:date", async (req, res) => {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   try {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res);
@@ -52,8 +58,8 @@ router.get("/:date", async (req, res) => {
 
 // 特定のidのエントリーを更新
 router.put("/:id", async (req, res) => {
-  // console.log("=== PUT リクエスト受信 ===");
-  // console.log("Body:", req.body);
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
 
   try {
     const { id } = req.params; // 分割代入でreq.paramsのdateを取り出し、entry_date変数に代入

@@ -10,6 +10,7 @@ interface AuthProviderProps {
 interface AuthContextType {
   session: any;
   isLoading: boolean;
+  isAuthenticated: boolean;
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   logOut: () => void;
@@ -21,9 +22,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   children,
   handleLogin,
 }: AuthProviderProps) => {
-  const [user, setUser] = useState(null);
-  const [session, setSession] = useState(null);
+  const [user, setUser] = useState<any>(null);
+  const [session, setSession] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // ログイン状態の監視
   useEffect(() => {
@@ -32,10 +34,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        console.log("getSession:", session);
+        // console.log("getSession(初期セッション):", session);
 
         if (session) {
+          setIsAuthenticated(true); // sessionが存在する場合はisAuthenticatedをtrueとする
           handleLogin();
+        } else {
+          setIsAuthenticated(false);
         }
       } catch (err) {
         console.log("Auth initialization error:", err);
@@ -44,6 +49,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       }
     };
     initializeAuth();
+
+    // 認証状態の変更を監視
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session);
+
+      if (session) {
+        setIsAuthenticated(true); // sessionが存在する場合はisAuthenticatedをtrueとする
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string) => {
@@ -111,7 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
   return (
     <AuthContext.Provider
-      value={{ signUp, signIn, logOut, session, isLoading }}
+      value={{ signUp, signIn, logOut, session, isLoading, isAuthenticated }}
     >
       {children}
     </AuthContext.Provider>

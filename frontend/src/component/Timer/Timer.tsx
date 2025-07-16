@@ -32,7 +32,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
           },
         });
         const resJson = await response.json();
-        console.log("resJson of getSubTask", resJson);
+        // console.log("resJson of getSubTask", resJson);
 
         const subTasks: SubTasks[] = resJson.data.map((item: any) => ({
           subtask_name: item.subtask_name,
