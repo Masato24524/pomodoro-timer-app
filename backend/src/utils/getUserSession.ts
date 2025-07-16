@@ -2,14 +2,14 @@ import { createSupabaseClient } from "../config/supabase";
 import { Request, Response } from "express";
 import { User } from "@supabase/supabase-js";
 
-// 各モジュールごとにsupabaseインスタンスを作成する
-const supabase = createSupabaseClient();
-
 // JWTトークンからユーザー情報を取得
 export async function getUserSession(
   req: Request,
   res: Response
 ): Promise<User | null> {
+  // 各モジュールごとにsupabaseインスタンスを作成する
+  const supabase = createSupabaseClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser(
