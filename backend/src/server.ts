@@ -16,12 +16,25 @@ const allowedOrigins =
     ? ["https://pomodoro-timer-app-vx57.onrender.com"]
     : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: [
+    "Origin",
+    "X-Requested-With",
+    "Content-Type",
+    "Accept",
+    "Authorization",
+    "Cache-Control",
+    "Pragma",
+  ],
+  exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
+  optionsSuccessStatus: 200, // IE11対応
+  maxAge: 86400, // プリフライトキャッシュ時間（24時間）
+};
+
+app.use(cors(corsOptions));
 
 app.use("/api/entries", entriesRouter);
 app.use("/api/timer-routing", timerRoutingRouter);
