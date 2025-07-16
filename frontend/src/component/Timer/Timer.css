@@ -1,6 +1,6 @@
 .timer-container {
   display: grid;
-  grid-template-columns: 5fr 3fr;
+  grid-template-columns: 4fr 3fr;
   grid-template-rows: 15% 60% 1fr;
 }
 
@@ -51,7 +51,7 @@
   height: stretch;
   width: stretch;
   margin: 0 auto;
-  padding: 0 20%;
+  padding: 0 10%;
 }
 .timer-button button {
   font-size: 18px;
@@ -99,20 +99,30 @@
 }
 
 .sub-task-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: 4fr 2fr 1fr;
+  grid-template-rows: 1fr;
+
   width: 100%;
   height: auto;
-  margin: auto 0;
-  align-items: center;
-  justify-content: space-between;
+  margin: 0.5rem 0 0.1rem 0;
+  /* align-items: center; */
+  /* justify-content: space-between; */
 }
 
 .sub-task-items {
-  margin: 5px 0 5px 0;
+  grid-column: 1;
+  grid-row: 1;
+
+  text-align: left;
+  /* margin: 5px 0 5px 0; */
   border: none;
   color: #5a5a5a;
 
   /* box-shadow: 2px 2px #696969; */
+}
+.sub-task-totaltime {
+  text-align: right;
 }
 
 .delete-subtask {
