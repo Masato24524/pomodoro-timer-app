@@ -72,6 +72,7 @@ router.post("/signin", async (req, res) => {
         error: "Authentication failed",
         details: error.message,
       });
+      return;
     } else {
       res.status(200).json({
         message: "Login successful",
