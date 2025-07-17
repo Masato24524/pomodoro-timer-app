@@ -9,11 +9,13 @@ const DateDoc = ({
   saveButtonChild,
   menuClose,
   selectedDate,
+  updateNewEntry,
 }: {
   fetchedData: fetchedDataResponse | null;
   saveButtonChild: any;
   menuClose: (value: boolean) => void;
   selectedDate: string;
+  updateNewEntry: (newId: number, newTitle: string, newContent: string) => void;
 }) => {
   const [inputTitle, setInputTitle] = useState<string>("");
   const [inputContent, setInputContent] = useState<string>("");
@@ -46,7 +48,7 @@ const DateDoc = ({
         doc_data: inputContent,
       };
 
-      console.log("entryData", entryData);
+      // console.log("entryData", entryData);
 
       // データを更新する
       const response = await fetch(
@@ -62,6 +64,14 @@ const DateDoc = ({
       );
 
       const resJson = await response.json();
+      // console.log("resJson of DataDoc", resJson);
+
+      // 作成した記事のid,Title,ContentにfetchedDataを更新する
+      const newEntryId = resJson.data.id;
+      // console.log("newEntryId", newEntryId);
+      const newEntryTitle = resJson.data.doc_title;
+      const newEntryContent = resJson.data.doc_data;
+      updateNewEntry(newEntryId, newEntryTitle, newEntryContent);
 
       // 親画面（カレンダーを更新する）
       saveButtonChild();

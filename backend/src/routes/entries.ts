@@ -27,8 +27,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 特定の日付のエントリー取得
-router.get("/:date", async (req, res) => {
+// 特定の日付のエントリーをIDから取得
+router.get("/entry/:id", async (req, res) => {
   // 各モジュールごとにsupabaseインスタンスを作成する
   const supabase = createSupabaseClient();
 
@@ -36,13 +36,13 @@ router.get("/:date", async (req, res) => {
     // JWTトークンからユーザー情報を取得
     const user = await getUserSession(req, res);
 
-    const { date } = req.params;
-    // console.log("受信日付", date);
+    const { id } = req.params;
+    console.log("選択されたid", id);
 
     const { data, error } = await supabase
       .from("daily_entries")
       .select("*")
-      .eq("entry_date", date)
+      .eq("id", id)
       .eq("uid", user?.id)
       .single(); // 1件のみ取得
 

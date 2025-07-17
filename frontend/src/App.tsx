@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { confirmSession } from "./utils/confirmSession";
 import { API_BASE_URL } from "./config/api";
 import type { dataType, fetchedDataResponse } from "./types/type";
+import type { EventInput } from "@fullcalendar/core"; // 公式型
 
 const App = () => {
   const [login, setLogin] = useState(false);
@@ -30,7 +31,7 @@ const App = () => {
 };
 
 function MainApp() {
-  const [events, setEvents] = useState();
+  const [events, setEvents] = useState<EventInput[] | undefined>();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [isInputMenu, setIsInputMenu] = useState<boolean>(false);
   const [fetchedData, setFetchedData] = useState<null | fetchedDataResponse>(
@@ -63,8 +64,8 @@ function MainApp() {
       // return resJson;
 
       const dispAllData = resJson.data.map((day: dataType) => {
-        const { doc_title: title, entry_date: start } = day;
-        return { title, start };
+        const { id: id, doc_title: title, entry_date: start } = day;
+        return { id, title, start };
       });
       // console.log("dispAllData", dispAllData);
       setEvents(dispAllData);
@@ -73,17 +74,27 @@ function MainApp() {
     fetchEvents();
   }, [isAuthenticated, forceRerender]);
 
-  // 日付欄をクリックしたときの処理
+  // 日付欄の空欄部分をクリックしたときの処理（新規作成 id=0）
   const handleDateClick = async (selectInfo: any) => {
     // console.log("selectInfo", selectInfo);
 
     const selectedDate: string = selectInfo.dateStr; // 日付の情報を取得
-    // フェッチした日付の情報をAPIリクエストで送信
-    const entryData = await fetchEntry(selectedDate);
+
+    // 空のentryDataを作成
+    const entryData = {
+      data: {
+        id: 0,
+        // uid: user_id,
+        entry_date: selectedDate,
+        doc_title: "",
+        doc_data: "",
+      },
+    };
+
     // console.log("entryData", entryData);
     setSelectedDate(selectedDate);
     setFetchedData(entryData);
-    // console.log("fetchedData", fetchedData);
+    // console.log("fetchedData_newEntry", fetchedData);
 
     // 入力メニューが閉じている場合、開く
     if (isInputMenu === false) {
@@ -91,26 +102,59 @@ function MainApp() {
     }
   };
 
-  // 選択した日付の情報を受け取ってAPIをフェッチする関数
-  const fetchEntry = async (date: string) => {
+  // 新規作成した記事のID,Title,Contentに更新するコールバック関数
+  const updateNewEntry = (
+    newId: number,
+    newTitle: string,
+    newContent: string
+  ) => {
+    setFetchedData((prev) => ({
+      ...prev!,
+      data: {
+        ...prev!.data,
+        id: newId,
+        doc_title: newTitle,
+        doc_data: newContent,
+      },
+    }));
+  };
+
+  // 日付欄の各エントリーをクリックしたときの処理
+  const handleEventClick = async (info: any) => {
+    // クリックされた要素の情報を取得
+    const clickedEvent = info.event;
+
+    // 日付を整形する
+    const convertDate = (date: any) => {
+      return new Date(date).toLocaleDateString("sv-SE"); // yyyy-mm-dd形式になる
+    };
+    const selectedDate: string = convertDate(clickedEvent.start); // 日付の情報を取得
+    // console.log(selectedDate);
+
+    // フェッチした日付の情報をAPIリクエストで送信
+    const entryData = await fetchEntryId(clickedEvent.id);
+    // console.log("entryData", entryData);
+    setSelectedDate(selectedDate);
+    setFetchedData(entryData);
+
+    // 入力メニューが閉じている場合、開く
+    if (isInputMenu === false) {
+      setIsInputMenu(!isInputMenu);
+    }
+  };
+
+  // 選択したevent日付のidを受け取ってフェッチする関数
+  const fetchEntryId = async (id: string) => {
     // JWTトークンからセッション情報を取得
     const session = await confirmSession();
 
-    // ここで:date部分を指定
-    const response = await fetch(`${API_BASE_URL}/api/entries/${date}`, {
+    // ここで:id部分を指定
+    const response = await fetch(`${API_BASE_URL}/api/entries/entry/${id}`, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
       },
     });
     const resJson = (await response.json()) as fetchedDataResponse;
-    // console.log("json_data", resJson);
-
-    // データが無い場合は空データを挿入
-    if (resJson.data === null) {
-      return {
-        data: { id: 0, entry_date: selectedDate, doc_title: "", doc_data: "" },
-      };
-    }
 
     return resJson;
   };
@@ -157,6 +201,7 @@ function MainApp() {
               // contentHeight={"auto"}
               dateClick={handleDateClick}
               events={events}
+              eventClick={handleEventClick}
             />
           </div>
           <div className={`datedoc-section ${isInputMenu ? "" : "close"}`}>
@@ -165,6 +210,7 @@ function MainApp() {
               saveButtonChild={saveButtonChild}
               menuClose={toggleMenuChild}
               selectedDate={selectedDate}
+              updateNewEntry={updateNewEntry}
             />
           </div>
         </div>
