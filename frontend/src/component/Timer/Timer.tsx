@@ -11,7 +11,9 @@ interface SubTasks {
 
 const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   // 時間を1500秒として保持する
-  const [totalSec, setTotalSec] = useState(25 * 60); // ポモドーロタイマーのセット時間
+  const pomodoroTime = 25 * 60;
+
+  const [totalSec, setTotalSec] = useState(pomodoroTime); // ポモドーロタイマーのセット時間
   const [start, setStart] = useState(false);
   const [inputSubTaskName, setInputSubTaskName] = useState<string>("");
   const [currentSubTasks, setCurrentSubTasks] = useState<SubTasks[]>([]);
@@ -66,13 +68,32 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
     setSelectedSubTask(selected_subtask);
   };
 
+  // タイマーをスタートする
+  const startTimer = () => {
+    if (selectedSubTask === "タスクを選んでください") {
+      alert("サブタスクが選択されていません");
+      return;
+    } else {
+      setStart(true);
+    }
+  };
+
   // タイマーの時間を更新する
   useEffect(() => {
     if (!start) return;
 
     // totalSecを1秒ずつ減らす
     const countDown = setInterval(() => {
-      setTotalSec((prevSec) => prevSec - 1);
+      setTotalSec((prevSec) => {
+        if (prevSec == 0) {
+          // 0になったらタイマー停止
+          stopTimer(prevSec);
+          alert("ポモドーロタイムが完了しました！");
+          return prevSec;
+        }
+        // console.log(prevSec);
+        return prevSec - 1;
+      });
     }, 1000);
 
     return () => clearInterval(countDown);
@@ -84,32 +105,35 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   };
 
   // タイマーの停止（選択されたサブタスクを、新規ポモドーロタイムと合わせて追加する）
-  const stopTimer = () => {
+  const stopTimer = (passedTime: number) => {
+    if (selectedSubTask === "タスクを選んでください")
+      return alert("サブタスクが選択されていません");
+
     const register_time = async () => {
       const date = new Date();
-      console.log("date:", date);
+      // console.log("date:", date);
 
       const yyyy = date.getFullYear();
       const mm = String(date.getMonth() + 1).padStart(2, "0");
       const dd = String(date.getDate()).padStart(2, "0");
       const localDate = `${yyyy}-${mm}-${dd}`;
-      console.log("localDate", localDate);
+      // console.log("localDate", localDate);
 
       const formattedTime: string = date.toTimeString().split(" ")[0];
       const timeZone: string = "09:00";
 
       const createTimestamp = (date: string, time: string): string => {
         const jstTimestamp: string = `${date}T${time}+${timeZone}`;
-        console.log("start_time:", jstTimestamp);
+        // console.log("start_time:", jstTimestamp);
         return new Date(jstTimestamp).toISOString(); // UTC時間に変換
       };
 
       const register_time_data = {
         subtask_name: selectedSubTask,
         start_time: createTimestamp(localDate, formattedTime), // UTC時間で登録
-        task_time: 25 * 60 - totalSec,
+        task_time: pomodoroTime - passedTime,
       };
-      console.log("更新するサブタスク情報", register_time_data);
+      // console.log("更新するサブタスク情報", register_time_data);
 
       try {
         // JWTトークンからセッション情報を取得
@@ -127,7 +151,8 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
           }
         );
         const resJson = await response.json();
-        console.log("更新したsubtaskの情報:", resJson);
+        // console.log("更新したsubtaskの情報:", resJson);
+        return resJson;
       } catch (err) {
         console.log("err", err);
       }
@@ -135,14 +160,9 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
 
     register_time();
     pauseTimer();
-    resetTimer();
+    setTotalSec(pomodoroTime);
     setIsGetSubTask(true);
     handleRefresh();
-  };
-
-  // タイマーをリセットする
-  const resetTimer = () => {
-    setTotalSec(25 * 60);
   };
 
   // サブタスクの入力欄の更新を保持する
@@ -154,7 +174,9 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   // プラスボタンを押したときに、サブタスクを項目を登録する。
   // ただし名称が重複していないこと
   const addSubTask = async () => {
-    console.log(inputSubTaskName);
+    if (!inputSubTaskName) return alert("サブタスク名が入力されていません");
+
+    // console.log(inputSubTaskName);
     try {
       // JWTトークンからセッション情報を取得
       const session = await confirmSession();
@@ -179,7 +201,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       });
 
       const resJson = await response.json();
-      console.log("登録したsubtaskの情報:", resJson);
+      // console.log("登録したsubtaskの情報:", resJson);
 
       if (resJson.success) {
         if (resJson.action === "created") {
@@ -263,9 +285,9 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
         {secTime2}
       </div>
       <div className="timer-button">
-        <button onClick={() => setStart(true)}>Start</button>
+        <button onClick={startTimer}>Start</button>
         <button onClick={pauseTimer}>Pause</button>
-        <button onClick={stopTimer}>Stop</button>
+        <button onClick={() => stopTimer(totalSec)}>Stop</button>
       </div>
       <div className="day-tasks">
         <div className="add-task">
