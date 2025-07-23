@@ -14,7 +14,10 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   const pomodoroTime = 25 * 60;
 
   const [totalSec, setTotalSec] = useState(pomodoroTime); // ポモドーロタイマーのセット時間
+  const [startTime, setStartTime] = useState<any>(null); // タイマーの開始時刻を監視する
   const [start, setStart] = useState(false);
+  const [totalPausedTime, setTotalPausedTime] = useState(0); // 累積一時停止時間
+  const [pauseStartTime, setPauseStartTime] = useState<any>(null); // タイマーの一時停止を監視する
   const [inputSubTaskName, setInputSubTaskName] = useState<string>("");
   const [currentSubTasks, setCurrentSubTasks] = useState<SubTasks[]>([]);
   const [selectedSubTask, setSelectedSubTask] =
@@ -70,37 +73,63 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
 
   // タイマーをスタートする
   const startTimer = () => {
+    // タスクが選択されていない場合はアラート
     if (selectedSubTask === "タスクを選んでください") {
       alert("サブタスクが選択されていません");
       return;
     } else {
-      setStart(true);
+      // 一時停止時間がある場合、その時間を累積する
+      if (pauseStartTime) {
+        const pauseDuation = Math.floor((Date.now() - pauseStartTime) / 1000);
+        // console.log("pauseDuation", pauseDuation);
+        setTotalPausedTime((prev: any) => prev + pauseDuation);
+
+        setPauseStartTime(null); // 一時停止開始時間をリセット
+        setStart(true);
+      }
+
+      if (!startTime) {
+        const now = Date.now();
+        setStartTime(now); // タイマーの開始時間を記録する
+
+        setStart(true); // タイマーを開始する
+      } else {
+        // console.log("Timer resumed");
+      }
     }
   };
 
   // タイマーの時間を更新する
   useEffect(() => {
-    if (!start) return;
+    if (!start || !startTime) return;
 
     // totalSecを1秒ずつ減らす
     const countDown = setInterval(() => {
-      setTotalSec((prevSec) => {
-        if (prevSec == 0) {
-          // 0になったらタイマー停止
-          stopTimer(prevSec);
-          alert("ポモドーロタイムが完了しました！");
-          return prevSec;
-        }
-        // console.log(prevSec);
-        return prevSec - 1;
-      });
+      const now = Date.now();
+
+      const totalElapsed = Math.floor((now - startTime) / 1000);
+      // console.log("totalElapsed", totalElapsed);
+      const activeElapased = totalElapsed - totalPausedTime;
+      // console.log("totalPausedTime", totalPausedTime);
+
+      const remaining = pomodoroTime - activeElapased;
+      // console.log("timerTime", remaining);
+      setTotalSec(remaining);
+
+      if (remaining == 0) {
+        // 0になったらタイマー停止
+        stopTimer(remaining);
+        alert("ポモドーロタイムが完了しました！");
+      }
     }, 1000);
 
     return () => clearInterval(countDown);
-  }, [start]);
+  }, [start, startTime]);
 
   // タイマーを一時停止する
   const pauseTimer = () => {
+    const now = Date.now();
+    setPauseStartTime(now);
     setStart(false);
   };
 
@@ -264,6 +293,33 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
       console.error(err);
     }
   };
+
+  // 画面切り替え時のスリープ対策
+  // 検証用ログ
+  // useEffect(() => {
+  //   let intervalId = null;
+
+  //   if (start) {
+  //     console.log("Timer started at:", new Date().toISOString());
+  //     console.log("Page visible", document.visibilityState);
+
+  //     intervalId = setInterval(() => {
+  //       const now = new Date();
+  //       console.log(
+  //         `Timer tick ${now.toISOString()} , Page: ${document.visibilityState}`
+  //       );
+
+  //       setTotalSec((prev: any) => {
+  //         console.log(`Time update: ${prev} -> ${prev - 1}`);
+  //         if (prev <= 1) {
+  //           console.log("Timer completed");
+  //         }
+
+  //         return prev - 1;
+  //       });
+  //     }, 1000);
+  //   }
+  // }, [start]);
 
   return (
     <div className="timer-container">
