@@ -33,7 +33,7 @@ function Chart(rerenderTrigger: any) {
           }
         );
         const result = await response.json();
-        console.log("result", result);
+        // console.log("result", result);
 
         setData(result.data);
       };

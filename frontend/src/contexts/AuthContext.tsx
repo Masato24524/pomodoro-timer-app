@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session);
+      console.log("Auth state changed:", event, !!session);
 
       if (session) {
         setIsAuthenticated(true); // sessionが存在する場合はisAuthenticatedをtrueとする
@@ -100,8 +100,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
     const data = await response.json();
 
-    console.log("singIn User", data.user);
-    console.log("singIn Session data", data.session);
+    // console.log("singIn User", data.user);
+    // console.log("singIn Session data", !!data.session);
 
     if (!data.session) {
       alert("ログインできません");

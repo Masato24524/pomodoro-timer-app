@@ -11,9 +11,9 @@ interface SubTasks {
 
 const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   // 時間を1500秒として保持する
-  const pomodoroTime = 25 * 60;
+  const pomodoroTime: number = 25 * 60;
 
-  const [totalSec, setTotalSec] = useState(pomodoroTime); // ポモドーロタイマーのセット時間
+  const [totalSec, setTotalSec] = useState<number>(pomodoroTime); // ポモドーロタイマーのセット時間
   const [startTime, setStartTime] = useState<any>(null); // タイマーの開始時刻を監視する
   const [start, setStart] = useState(false);
   const [totalPausedTime, setTotalPausedTime] = useState(0); // 累積一時停止時間
@@ -94,7 +94,7 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
 
         setStart(true); // タイマーを開始する
       } else {
-        // console.log("Timer resumed");
+        console.log("Timer resumed");
       }
     }
   };
@@ -135,10 +135,15 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
 
   // タイマーの停止（選択されたサブタスクを、新規ポモドーロタイムと合わせて追加する）
   const stopTimer = (passedTime: number) => {
+    console.log("passedTime", passedTime);
+
     if (selectedSubTask === "タスクを選んでください")
       return alert("サブタスクが選択されていません");
 
     const register_time = async () => {
+      if (passedTime === pomodoroTime) return; // passedTimeが減っていないときはデータベース登録しない
+
+      //データベース登録用の時間を整形
       const date = new Date();
       // console.log("date:", date);
 
@@ -188,7 +193,10 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
     };
 
     register_time();
-    pauseTimer();
+    setStart(false);
+    setStartTime(null);
+    setPauseStartTime(null); // 一時停止開始時間をリセット
+    setTotalPausedTime(0); // 累積一時定時間をリセット
     setTotalSec(pomodoroTime);
     setIsGetSubTask(true);
     handleRefresh();
