@@ -103,23 +103,31 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
   useEffect(() => {
     if (!start || !startTime) return;
 
-    // totalSecを1秒ずつ減らす
+    // タイマーの開始時間と現在時間を比較して、totalSecを更新する（1秒毎）
     const countDown = setInterval(() => {
       const now = Date.now();
 
       const totalElapsed = Math.floor((now - startTime) / 1000);
       // console.log("totalElapsed", totalElapsed);
-      const activeElapased = totalElapsed - totalPausedTime;
+      const activeElapased = Math.max(0, totalElapsed - totalPausedTime);
       // console.log("totalPausedTime", totalPausedTime);
 
-      const remaining = pomodoroTime - activeElapased;
+      const remaining = Math.max(0, pomodoroTime - activeElapased);
       // console.log("timerTime", remaining);
       setTotalSec(remaining);
 
-      if (remaining == 0) {
-        // 0になったらタイマー停止
-        stopTimer(remaining);
-        alert("ポモドーロタイムが完了しました！");
+      // 0になったらタイマー停止
+      if (remaining === 0) {
+        // setIntervalをクリアー
+        clearInterval(countDown);
+
+        //少し遅延をはさんでからアラート表示
+        setTimeout(() => {
+          stopTimer(remaining);
+          alert("ポモドーロタイムが完了しました！");
+        }, 100);
+
+        return;
       }
     }, 1000);
 
@@ -135,13 +143,13 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
 
   // タイマーの停止（選択されたサブタスクを、新規ポモドーロタイムと合わせて追加する）
   const stopTimer = (passedTime: number) => {
-    console.log("passedTime", passedTime);
+    // console.log("passedTime", passedTime);
 
     if (selectedSubTask === "タスクを選んでください")
       return alert("サブタスクが選択されていません");
 
-    const register_time = async () => {
-      if (passedTime === pomodoroTime) return; // passedTimeが減っていないときはデータベース登録しない
+    const registerTime = async () => {
+      // if (passedTime === pomodoroTime) return;
 
       //データベース登録用の時間を整形
       const date = new Date();
@@ -186,20 +194,32 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
         );
         const resJson = await response.json();
         // console.log("更新したsubtaskの情報:", resJson);
+
+        resetTimerState();
+
         return resJson;
       } catch (err) {
         console.log("err", err);
       }
     };
 
-    register_time();
-    setStart(false);
-    setStartTime(null);
-    setPauseStartTime(null); // 一時停止開始時間をリセット
-    setTotalPausedTime(0); // 累積一時定時間をリセット
-    setTotalSec(pomodoroTime);
-    setIsGetSubTask(true);
-    handleRefresh();
+    const resetTimerState = () => {
+      setStart(false);
+      setStartTime(null);
+      setPauseStartTime(null); // 一時停止開始時間をリセット
+      setTotalPausedTime(0); // 累積一時定時間をリセット
+      setTotalSec(pomodoroTime);
+      setIsGetSubTask(true);
+      handleRefresh();
+    };
+    // console.log("pomodoroTime", pomodoroTime);
+
+    if (passedTime === pomodoroTime) {
+      // passedTimeが減っていないときはデータベース登録しない
+      resetTimerState();
+    } else {
+      registerTime();
+    }
   };
 
   // サブタスクの入力欄の更新を保持する
