@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import healthRouter from "./routes/health";
 import entriesRouter from "./routes/entries";
 import timerRoutingRouter from "./routes/timer-routing";
 import authRouter from "./routes/auth";
@@ -36,6 +37,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use("/api/health", healthRouter);
 app.use("/api/entries", entriesRouter);
 app.use("/api/timer-routing", timerRoutingRouter);
 

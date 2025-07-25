@@ -141,12 +141,29 @@ const Timer = ({ handleRefresh }: { handleRefresh: () => void }) => {
     setStart(false);
   };
 
+  // API呼び出し前にサーバーを起こす
+  const wakeUpServer = async () => {
+    try {
+      await fetch(`${API_BASE_URL}/api/health`, {
+        method: "GET",
+        // タイムアウトを短く設定
+        signal: AbortSignal.timeout(5000),
+      });
+      // 仮の表示（今後、メッセージ表示を実装する）
+    } catch (error) {
+      console.log("Server wake-up attempt", error);
+      alert("サーバー起動中です。少し待つと実行されます。");
+    }
+  };
+
   // タイマーの停止（選択されたサブタスクを、新規ポモドーロタイムと合わせて追加する）
-  const stopTimer = (passedTime: number) => {
+  const stopTimer = async (passedTime: number) => {
     // console.log("passedTime", passedTime);
 
     if (selectedSubTask === "タスクを選んでください")
       return alert("サブタスクが選択されていません");
+
+    await wakeUpServer();
 
     const registerTime = async () => {
       // if (passedTime === pomodoroTime) return;
